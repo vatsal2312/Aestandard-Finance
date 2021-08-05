@@ -1,0 +1,17 @@
+{
+  "devDependencies": {
+    "@nomiclabs/hardhat-ethers": "^2.0.2",
+    "@nomiclabs/hardhat-waffle": "^2.0.1",
+    "chai": "^4.3.4",
+    "chai-almost": "^1.0.1",
+    "ethereum-waffle": "^3.4.0",
+    "ethers": "^5.4.3",
+    "hardhat": "^2.5.0",
+    "mocha": "^7.2.0"
+  },
+  "dependencies": {
+    "@openzeppelin/contracts": "^4.2.0",
+    "abdk-libraries-solidity": "^2.3.0",
+    "prb-math": "^2.2.0"
+  }
+}
