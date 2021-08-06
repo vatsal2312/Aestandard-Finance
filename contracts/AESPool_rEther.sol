@@ -2,26 +2,40 @@ pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
+/**
+         _                   _           _
+        / /\                /\ \        / /\
+       / /  \              /  \ \      / /  \
+      / / /\ \            / /\ \ \    / / /\ \__
+     / / /\ \ \          / / /\ \_\  / / /\ \___\
+    / / /  \ \ \        / /_/_ \/_/  \ \ \ \/___/
+   / / /___/ /\ \      / /____/\      \ \ \
+  / / /_____/ /\ \    / /\____\/  _    \ \ \
+ / /_________/\ \ \  / / /______ /_/\__/ / /
+/ / /_       __\ \_\/ / /_______\\ \/___/ /
+\_\___\     /____/_/\/__________/ \_____\/
+
+Advance Encryption Standard Finance.
+
+Website:aestandard.finance
+Email:team@aestandard.finance
+Bug Bounty:team@aestandard.finance
+
+License: MIT
+
+AES Cryptoasset Staking Pool, Recieve Ether. (Version 1)
+Network: Polygon
+
+
+**/
+
 contract AESPool {
-
-    /*
-
-    To do.
-
-    Last UI test. (PERFECT APR)
-    Github
-    AESPool_rToken next
-
-    PARSE UNITS FOR EVERYTHING
-
-    */
 
     // Name of contract
     string public name = "AES Staking Pool (receive Ether) V1";
 
     // Define the variables we'll be using on the contract
-    address public aesToken;
-    //address public aesToken = "0x5ac3ceee2c3e6790cadd6707deb2e87ea83b0631";
+    address public aesToken = "0x5ac3ceee2c3e6790cadd6707deb2e87ea83b0631";
     address custodian;
 
     address[] public stakers;
@@ -156,7 +170,7 @@ contract AESPool {
       DistributionPercentage = percent;
     }
 
-    // Only used in testing
+    // Really just used in testing
     function setAESAddress(address addr) public CustodianOnly {
       aesToken = addr;
     }
