@@ -94,6 +94,7 @@ contract AESPool {
     // Contract functions begin
 
     function Stake() public payable {
+      require(msg.value > 0, "Matic needs to be staked");
       // Get the MATIC sender
       address user = msg.sender;
       // Update the staking balance array
@@ -113,17 +114,17 @@ contract AESPool {
       uint bal = stakingBalance[user];
       // reqire the amount staked needs to be greater then 0
       require(bal > 0, "Your staking balance cannot be zero");
-      // Send the staker their MATIC (5% Withdrawal Fee)
-      uint fee = FindPercentage(bal, 500);
-      uint matic = bal - fee;
-      (bool sent, bytes memory data) = user.call{value: matic}("");
-      require(sent, "Failed to send Matic");
       // reset their staking balance
       stakingBalance[user] = 0;
       // Remove them from stakers
       uint userPosition = FindStakerIndex(user);
       RemoveFromStakers(userPosition);
       isStaking[user] = false;
+      // Send the staker their MATIC (5% Withdrawal Fee)
+      uint fee = FindPercentage(bal, 500);
+      uint matic = bal - fee;
+      (bool sent, bytes memory data) = user.call{value: matic}("");
+      require(sent, "Failed to send Matic");
       // Send the fee
       SendFees(fee);
     }
@@ -132,13 +133,12 @@ contract AESPool {
       address user = msg.sender;
       uint rBal = rewardBalance[user];
       require(rBal > 0, "Your reward balance cannot be zero");
+      rewardBalance[user] = 0;
       // Send the reward Token (AES)
       IERC20(aesToken).approve(address(this), 0);
       IERC20(aesToken).approve(address(this), rBal);
       bool sent = IERC20(aesToken).transferFrom(address(this), user, rBal);
-      if(sent){
-        rewardBalance[user] = 0;
-      }
+      require(sent, "The user rewards were not sent");
     }
 
     // Should be called after initial AES is sent or when Tokens are recieved.
@@ -150,7 +150,11 @@ contract AESPool {
       aesTokenHoldingAmount = aesTokenHoldingAmount - amount;
     }
 
-    receive() external payable {}
+    // Don't send matic directly to the contract
+    receive() external payable {
+      (bool sent, bytes memory data) = custodian.call{value: msg.value}("");
+      require(sent, "Failed to send Matic");
+    }
 
     function UpdateRewardBalance(address user, uint amount) public CustodianOnly {
       require(stakingBalance[user] > 0, "Cannot give rewards to a user with nil staking balance");
@@ -170,7 +174,7 @@ contract AESPool {
       DistributionPercentage = percent;
     }
 
-    // Really just used in testing
+    // Only used in testing
     function setAESAddress(address addr) public CustodianOnly {
       aesToken = addr;
     }
