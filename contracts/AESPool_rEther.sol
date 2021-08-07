@@ -14,19 +14,13 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
  / /_________/\ \ \  / / /______ /_/\__/ / /
 / / /_       __\ \_\/ / /_______\\ \/___/ /
 \_\___\     /____/_/\/__________/ \_____\/
-
 Advance Encryption Standard Finance.
-
 Website:aestandard.finance
-Email:team@aestandard.finance
-Bug Bounty:team@aestandard.finance
-
+Email:team<at>aestandard.finance
+Bug Bounty:team<at>aestandard.finance
 License: MIT
-
 AES Cryptoasset Staking Pool, Recieve Ether. (Version 1)
 Network: Polygon
-
-
 **/
 
 contract AESPool {
@@ -35,7 +29,7 @@ contract AESPool {
     string public name = "AES Staking Pool (receive Ether) V1";
 
     // Define the variables we'll be using on the contract
-    address public aesToken = "0x5ac3ceee2c3e6790cadd6707deb2e87ea83b0631";
+    address public aesToken = 0x5aC3ceEe2C3E6790cADD6707Deb2E87EA83b0631;
     address custodian;
 
     address[] public stakers;
