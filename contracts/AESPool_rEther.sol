@@ -20,18 +20,17 @@ Website:aestandard.finance
 Email:team@aestandard.finance
 Bug Bounty:team@aestandard.finance
 License: MIT
-AES Cryptoasset Staking Pool, Recieve Token. (Version 1)
+AES Cryptoasset Staking Pool, Recieve Ether. (Version 1)
 Network: Polygon
 */
 
-contract AESPoolrToken is ReentrancyGuard {
+contract AESPoolrEther is ReentrancyGuard {
 
     // Name of contract
-    string public name = "AES Staking Pool (receive Token) V1";
+    string public name = "AES Staking Pool (receive Ether) V1";
 
     // Define the variables we'll be using on the contract
-    address public stakingToken = 0x5aC3ceEe2C3E6790cADD6707Deb2E87EA83b0631; // stake AES
-    address public aesToken = 0x5aC3ceEe2C3E6790cADD6707Deb2E87EA83b0631; // earn AES
+    address public aesToken = 0x5aC3ceEe2C3E6790cADD6707Deb2E87EA83b0631;
     address public custodian;
 
     address[] public stakers;
@@ -86,21 +85,17 @@ contract AESPoolrToken is ReentrancyGuard {
 
     // Contract functions begin
 
-    function StakeTokens(uint amount) public payable nonReentrant {
-      // user needs to first approve this contract to spend (amount of) tokens
-      require(amount > 0, "An amount must be passed through as an argument");
-      bool recieved = IERC20(stakingToken).transferFrom(msg.sender, address(this), amount);
-      if(recieved){
-        // Get the sender
-        address user = msg.sender;
-        // Update the staking balance array
-        stakingBalance[user] = stakingBalance[user] + amount;
-        // Check if the sender is not staking
-        if(!isStaking[user]){
-          // Add them to stakers
-          stakers.push(user);
-          isStaking[user] = true;
-        }
+    function Stake() public nonReentrant payable {
+      require(msg.value > 0, "Matic needs to be staked");
+      // Get the MATIC sender
+      address user = msg.sender;
+      // Update the staking balance array
+      stakingBalance[user] = stakingBalance[user] + msg.value;
+      // Check if the sender is not staking
+      if(!isStaking[user]){
+        // Add them to stakers
+        stakers.push(user);
+        isStaking[user] = true;
       }
     }
 
@@ -117,16 +112,14 @@ contract AESPoolrToken is ReentrancyGuard {
       uint userPosition = FindStakerIndex(user);
       RemoveFromStakers(userPosition);
       isStaking[user] = false;
-      // Send the staker their tokens (5% Withdrawal Fee)
+      // Send the staker their MATIC (5% Withdrawal Fee)
       uint fee = FindPercentage(bal, withdrawalFee);
-      uint rAmount = bal - fee; // return Amount
-      IERC20(stakingToken).approve(address(this), 0);
-      IERC20(stakingToken).approve(address(this), rAmount);
-      bool sent = IERC20(stakingToken).transferFrom(address(this), user, rAmount);
+      uint matic = bal - fee;
+      (bool sent, ) = user.call{value: matic}("");
       if(!sent){
         stakingBalance[user] = bal;
       }else{
-        // Send the fee (if there is any)
+        // Send the fee
         custodianFees = custodianFees + fee;
       }
     }
@@ -143,10 +136,8 @@ contract AESPoolrToken is ReentrancyGuard {
       if(!sent){ rewardBalance[user] = rBal; }
     }
 
-    function CollectFees() public CustodianOnly nonReentrant {
-      IERC20(stakingToken).approve(address(this), 0);
-      IERC20(stakingToken).approve(address(this), custodianFees);
-      bool sent = IERC20(stakingToken).transferFrom(address(this), custodian, custodianFees);
+    function CollectFees() public nonReentrant CustodianOnly {
+      (bool sent, ) = custodian.call{value: custodianFees}("");
       if(sent){custodianFees = 0;}
     }
 
@@ -161,7 +152,7 @@ contract AESPoolrToken is ReentrancyGuard {
 
     // Don't send matic directly to the contract
     receive() external payable nonReentrant {
-      (bool sent, bytes memory data) = custodian.call{value: msg.value}("");
+      (bool sent, ) = custodian.call{value: msg.value}("");
       if(!sent){ custodianFees = custodianFees + msg.value; }
     }
 
@@ -186,10 +177,6 @@ contract AESPoolrToken is ReentrancyGuard {
     function ChangeWithdrawalFee(uint percent) public CustodianOnly {
       require(1000 >= percent, "Withdrawal Overflow");
       withdrawalFee = percent;
-    }
-
-    function SetStakingTokenAddress(address addr) public CustodianOnly {
-      stakingToken = addr;
     }
 
     // Only used in testing
